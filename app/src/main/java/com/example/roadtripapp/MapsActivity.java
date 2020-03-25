@@ -59,7 +59,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locationlistner = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                latlng = new LatLng(location.getLatitude(),location.getLongitude());
+                latlng = new LatLng(location.getLatitude(), location.getLongitude());
                 mMap.addMarker(new MarkerOptions().position(latlng).title("My Position"));
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latlng));
             }
@@ -82,16 +82,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         locationmanager = (LocationManager) getSystemService(LOCATION_SERVICE); //Allow for usage of location service for location manager
 
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    Activity#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for Activity#requestPermissions for more details.
-            return;
+        try {
+            locationmanager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME, MAX_DIST, locationlistner);
+        } catch (SecurityException e) {
+            e.printStackTrace();
         }
-        locationmanager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME, MAX_DIST, locationlistner);
     }
 }
