@@ -36,9 +36,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, 0);
         //TEST OUT SMS
-        String num = "7786975730";
-        String message = "This is a test message. If you recieved this, Andrew made some progress. Yay!";
-        sendSMS(num, message);
+
 
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -100,9 +98,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    public void sendSMS(String number_to_send, String message) {
-        SmsManager smsManager = SmsManager.getDefault();
-        smsManager.sendTextMessage(number_to_send, null, message, null, null);
-    }
+
 
 }
