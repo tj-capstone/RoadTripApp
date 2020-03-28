@@ -22,11 +22,22 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceReport;
+import com.google.android.gms.location.places.ui.PlacePicker;
+
 public class MainActivity extends AppCompatActivity {
     public static final int CONTACT_ACTIVITY_REQUEST_CODE = 0;
     static final int MAP_REQUEST_CODE = 1;
+    public String Lat;
+    public String Long;
     public TextView number_text;
     public TextView location_text;
+    public TextView lat_text;
+    public TextView long_text;
     public Button btnContact;
     public Button btnSend;
     public Button btnLocation;
@@ -50,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
         btnContact = (Button) findViewById(R.id.btnContact);
         btnLocation = (Button) findViewById(R.id.btnLocation);
         btnSend = (Button) findViewById(R.id.btnSend);
+        lat_text = (TextView) findViewById(R.id.tvLat);
+        long_text = (TextView) findViewById(R.id.tvLongitude);
 
         btnContact.setOnClickListener(clicker);
         btnLocation.setOnClickListener(clicker);
@@ -59,14 +72,20 @@ public class MainActivity extends AppCompatActivity {
         
             GetNameDialog();
 
-
     }
     private View.OnClickListener clicker = new View.OnClickListener() {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.btnLocation:
                     location = "Test Location";
-                    //Put map activity here
+                    PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+                    try {
+                        startActivityForResult(builder.build(MainActivity.this), MAP_REQUEST_CODE);
+                    } catch (GooglePlayServicesRepairableException e) {
+                        e.printStackTrace();
+                    } catch (GooglePlayServicesNotAvailableException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 case R.id.btnContact:
                     Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
@@ -84,10 +103,9 @@ public class MainActivity extends AppCompatActivity {
                     break;
 
             }
+
         }
     };
-
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -101,10 +119,13 @@ public class MainActivity extends AppCompatActivity {
 
                 number_text.setText("The Contact Number is: " + number);
             }
-
         }
         if (requestCode == MAP_REQUEST_CODE && resultCode == RESULT_OK) {
-
+            Place place = PlacePicker.getPlace(data,this);
+            String latitude = String.valueOf(place.getLatLng().latitude);
+            String longitude = String.valueOf(place.getLatLng().longitude);
+            lat_text.setText(latitude);
+            long_text.setText(longitude);
         }
 
     }
