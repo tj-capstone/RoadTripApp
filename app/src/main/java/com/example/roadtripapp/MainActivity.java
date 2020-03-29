@@ -132,6 +132,8 @@ public class MainActivity extends AppCompatActivity {
                         while(location_reached == false) {
                             //distRun.run();
                             distance = check_distance();
+                            lat_textCurr.setText(Double.toString(LatCurr));
+                            long_textCurr.setText(Double.toString(LongCurr));
                             if (distance < LOCATION_DISTANCE_CHECK)
                                 location_reached = true;
                         }
@@ -292,8 +294,7 @@ public class MainActivity extends AppCompatActivity {
                     super.onLocationResult(locationResult);
                     LatCurr = locationResult.getLastLocation().getLatitude();
                     LongCurr = locationResult.getLastLocation().getLongitude();
-                    lat_textCurr.setText(Double.toString(LatCurr));
-                    long_textCurr.setText(Double.toString(LongCurr));
+
                     Count = Count + 1;
                 }
             };
