@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">RoadTripApp</string>
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_maps_feature">Map</string>
 </resources>

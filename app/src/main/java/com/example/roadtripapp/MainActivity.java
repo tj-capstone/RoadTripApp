@@ -78,14 +78,8 @@ public class MainActivity extends AppCompatActivity {
             switch (v.getId()) {
                 case R.id.btnLocation:
                     location = "Test Location";
-                    PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
-                    try {
-                        startActivityForResult(builder.build(MainActivity.this), MAP_REQUEST_CODE);
-                    } catch (GooglePlayServicesRepairableException e) {
-                        e.printStackTrace();
-                    } catch (GooglePlayServicesNotAvailableException e) {
-                        e.printStackTrace();
-                    }
+                    Intent mapsfeature = new Intent(getApplicationContext(), MapsFeature.class);
+                    startActivity(mapsfeature);
                     break;
                 case R.id.btnContact:
                     Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
@@ -121,11 +115,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         if (requestCode == MAP_REQUEST_CODE && resultCode == RESULT_OK) {
-            Place place = PlacePicker.getPlace(data,this);
-            String latitude = String.valueOf(place.getLatLng().latitude);
-            String longitude = String.valueOf(place.getLatLng().longitude);
-            lat_text.setText(latitude);
-            long_text.setText(longitude);
+
         }
 
     }
