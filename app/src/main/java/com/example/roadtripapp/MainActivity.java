@@ -103,15 +103,10 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.btnLocation:
-                    //////testomg
-                    LongDest = 100.0;
-                    LatDest = 100.0;
-                    lat_textDest.setText(Double.toString(LatDest));
-                    long_textDest.setText(Double.toString(LongDest));
-                    sendNotification();
-                    //////End Testing
-                    //Intent mapsfeature = new Intent(getApplicationContext(), MapsFeature.class);
-                    //startActivity(mapsfeature);
+
+
+                    Intent mapsfeature = new Intent(getApplicationContext(), MapsFeature.class);
+                    startActivity(mapsfeature);
                     break;
                 case R.id.btnContact:
                     Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
