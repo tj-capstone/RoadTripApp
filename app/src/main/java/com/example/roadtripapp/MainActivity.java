@@ -19,6 +19,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Process;
 import android.provider.ContactsContract;
 import android.telephony.SmsManager;
 import android.text.InputType;
@@ -41,6 +42,8 @@ import com.google.android.gms.location.places.PlaceReport;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.util.concurrent.Executor;
+
 public class MainActivity extends AppCompatActivity {
     public static final int CONTACT_ACTIVITY_REQUEST_CODE = 0;
     static final int MAP_REQUEST_CODE = 1;
@@ -61,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
     public String location;
     public String name;
     public int Count = 0;
+    public Double distance;
     public static final Double LOCATION_DISTANCE_CHECK = 0.1; //needs to be in kilometers - eg this is 100 m
     LocationCallback locationCallback;
     LocationRequest locationRequest;
@@ -96,7 +100,8 @@ public class MainActivity extends AppCompatActivity {
         createNotificationChannel();
         //Get name of owner of phone owner for message later
         GetNameDialog();
-        getLocation();
+
+
 
 
     }
@@ -105,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
             switch (v.getId()) {
                 case R.id.btnLocation:
                     Intent mapsfeature = new Intent(getApplicationContext(), MapsFeature.class);
-                    startActivity(mapsfeature);
+                    startActivityForResult(mapsfeature,MAP_REQUEST_CODE);
                     break;
                 case R.id.btnContact:
                     Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
@@ -115,26 +120,30 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.btnSend:
 
                     if((number != null) && (LongDest != null) && (LatDest != null)) {
+                        //LocationRunnable locThread = new LocationRunnable();
+                        //locThread.run();
+                        new Thread(new LocationRunnable()).start();
+                        //DistanceRunnable distRun = new DistanceRunnable();
+
+
                         location_text.setText("Trip Started");
                         boolean location_reached = false;
 
                         while(location_reached == false) {
-
-                            int testCount = Count;
-                            Double test = check_distance();
-                            if (test < LOCATION_DISTANCE_CHECK)
+                            //distRun.run();
+                            distance = check_distance();
+                            if (distance < LOCATION_DISTANCE_CHECK)
                                 location_reached = true;
                         }
                         location_text.setText("Destination Reached");
                         sendNotification();
                         String message = name + " has reached their destination!";
                         sendSMS(number, message);
-
-                        break;
                     }
                     else{
                         location_text.setText("NO location set");
                     }
+                    break;
                 default:
                     break;
 
@@ -156,17 +165,16 @@ public class MainActivity extends AppCompatActivity {
                 number_text.setText("The Contact Number is: " + number);
             }
         }
-        if (requestCode == MAP_REQUEST_CODE && resultCode == RESULT_OK) {
+        if (requestCode == MAP_REQUEST_CODE) {
             //TJ, all you should need to change in here is to set LatDest/LongDest to the values from the map activity
 
             // CODE NEVER GETS INTO THIS IF STATEMENT, HOW CAN I GET THE MAPREQUEST CODE TO "GO" WHEN I PRESS THE PICK LOCATION
             // BUTTON IN THE MAP ACTIVITY ??????
 
-            Intent incomingIntent = getIntent();
-            String incominglat = incomingIntent.getStringExtra("latitude");
-            String incominglong = incomingIntent.getStringExtra("longitude");
-            LatDest = Double.valueOf(incominglat);
-            LongDest = Double.valueOf(incominglong);
+
+            LatDest = data.getDoubleExtra("LAT",0);
+            LongDest = data.getDoubleExtra("LONG",0);
+
             location_text.setText("Location Set");
             lat_textDest.setText(Double.toString(LatDest));
             long_textDest.setText(Double.toString(LongDest));
@@ -263,28 +271,54 @@ public class MainActivity extends AppCompatActivity {
 
 
     void getLocation() {
-        locationRequest = LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(5 * 1000)
-                .setFastestInterval(5 * 1000);
 
-        locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                super.onLocationResult(locationResult);
-                LatCurr = locationResult.getLastLocation().getLatitude();
-                LongCurr = locationResult.getLastLocation().getLongitude();
-                lat_textCurr.setText(Double.toString(LatCurr));
-                long_textCurr.setText(Double.toString(LongCurr));
-                Count = Count + 1;
-            }
-        };
+    }
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
+    public class LocationRunnable implements Runnable {
+
+        @Override
+        public void run() {
+            // Moves the current Thread into the background
+            android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
+
+            locationRequest = LocationRequest.create()
+                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                    .setInterval(5 * 1000)
+                    .setFastestInterval(5 * 1000);
+
+            locationCallback = new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    super.onLocationResult(locationResult);
+                    LatCurr = locationResult.getLastLocation().getLatitude();
+                    LongCurr = locationResult.getLastLocation().getLongitude();
+                    lat_textCurr.setText(Double.toString(LatCurr));
+                    long_textCurr.setText(Double.toString(LongCurr));
+                    Count = Count + 1;
+                }
+            };
+
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
+
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
         }
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+
+    }
+
+    public class DistanceRunnable implements Runnable {
+
+        @Override
+        public void run() {
+            // Moves the current Thread into the background
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+
+
+                int testCount = Count;
+                distance = check_distance();
+
+
+        }
+
     }
 }
 

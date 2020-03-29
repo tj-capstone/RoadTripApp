@@ -73,10 +73,11 @@ public class MapsFeature extends FragmentActivity implements OnMapReadyCallback,
         pickLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MapsFeature.this, MainActivity.class);
-                intent.putExtra("latitude", finalLatitude);
-                intent.putExtra("longitude", finalLongitude);
-                startActivity(intent);
+                Intent i = new Intent(MapsFeature.this, MainActivity.class);
+                i.putExtra("LAT", finalLatitude);
+                i.putExtra("LONG", finalLongitude);
+                setResult(RESULT_OK, i);
+                finish();
             }
         });
 
@@ -182,5 +183,6 @@ public class MapsFeature extends FragmentActivity implements OnMapReadyCallback,
         mMap.addMarker(options);
         finalLatitude = options.getPosition().latitude;
         finalLongitude = options.getPosition().longitude;
+
     }
 }
