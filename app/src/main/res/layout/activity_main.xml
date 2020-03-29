@@ -13,8 +13,8 @@
         android:layout_alignStart="@+id/btnCancel"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginEnd="89dp"
-        android:layout_marginBottom="521dp"
+        android:layout_marginEnd="79dp"
+        android:layout_marginBottom="325dp"
         android:text="No Contact Selected"
         android:textSize="24sp" />
 
@@ -26,7 +26,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
         android:layout_marginEnd="84dp"
-        android:layout_marginBottom="425dp"
+        android:layout_marginBottom="266dp"
         android:text="No Location Selected"
         android:textSize="24sp" />
 
@@ -36,9 +36,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginEnd="136dp"
+        android:layout_marginEnd="133dp"
         android:layout_marginRight="55dp"
-        android:layout_marginBottom="227dp"
+        android:layout_marginBottom="97dp"
         android:text="Pick Contact" />
 
     <Button
@@ -47,10 +47,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginEnd="127dp"
+        android:layout_marginEnd="145dp"
         android:layout_marginRight="55dp"
-        android:layout_marginBottom="137dp"
-        android:text="Send Test Text" />
+        android:layout_marginBottom="28dp"
+        android:text="Start Trip" />
 
     <Button
         android:id="@+id/btnLocation"
@@ -59,27 +59,69 @@
         android:layout_alignTop="@+id/btnCancel"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginEnd="135dp"
-        android:layout_marginBottom="315dp"
+        android:layout_marginEnd="136dp"
+        android:layout_marginBottom="175dp"
         android:text="Pick Location" />
 
     <TextView
-        android:id="@+id/tvLat"
+        android:id="@+id/tvLatDest"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/tvNumber"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="176dp"
-        android:layout_marginBottom="88dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="83dp"
+        android:layout_marginBottom="503dp"
         android:text="Latitude " />
 
     <TextView
-        android:id="@+id/tvLongitude"
+        android:id="@+id/tvLongitudeDest"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/tvNumber"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="176dp"
-        android:layout_marginBottom="42dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="76dp"
+        android:layout_marginBottom="438dp"
         android:text="Longitude" />
+
+    <TextView
+        android:id="@+id/tvLatCurr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="274dp"
+        android:layout_marginBottom="498dp"
+        android:text="Latitude " />
+
+    <TextView
+        android:id="@+id/tvLongitudeCurr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="269dp"
+        android:layout_marginBottom="438dp"
+        android:text="Longitude" />
+
+    <TextView
+        android:id="@+id/CurrTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="268dp"
+        android:layout_marginBottom="571dp"
+        android:text="Current"
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/DestTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="52dp"
+        android:layout_marginBottom="573dp"
+        android:text="Destination"
+        android:textSize="24sp" />
 </RelativeLayout>

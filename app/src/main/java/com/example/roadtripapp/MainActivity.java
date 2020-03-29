@@ -2,16 +2,22 @@ package com.example.roadtripapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.DialogFragment;
 
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.telephony.SmsManager;
@@ -25,29 +31,46 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceReport;
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 public class MainActivity extends AppCompatActivity {
     public static final int CONTACT_ACTIVITY_REQUEST_CODE = 0;
     static final int MAP_REQUEST_CODE = 1;
-    public String Lat;
-    public String Long;
+    public Double LatDest = null;
+    public Double LongDest = null;
+    public Double LatCurr = null;
+    public Double LongCurr = null;
     public TextView number_text;
     public TextView location_text;
-    public TextView lat_text;
-    public TextView long_text;
+    public TextView lat_textDest;
+    public TextView long_textDest;
+    public TextView lat_textCurr;
+    public TextView long_textCurr;
     public Button btnContact;
     public Button btnSend;
     public Button btnLocation;
     public String number;
     public String location;
     public String name;
+    public int Count = 0;
+    public static final Double LOCATION_DISTANCE_CHECK = 0.1; //needs to be in kilometers - eg this is 100 m
+    LocationCallback locationCallback;
+    LocationRequest locationRequest;
+    FusedLocationProviderClient fusedLocationClient;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PackageManager.PERMISSION_GRANTED);
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PackageManager.PERMISSION_GRANTED);
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, 0);
@@ -61,25 +84,34 @@ public class MainActivity extends AppCompatActivity {
         btnContact = (Button) findViewById(R.id.btnContact);
         btnLocation = (Button) findViewById(R.id.btnLocation);
         btnSend = (Button) findViewById(R.id.btnSend);
-        lat_text = (TextView) findViewById(R.id.tvLat);
-        long_text = (TextView) findViewById(R.id.tvLongitude);
+        lat_textDest = (TextView) findViewById(R.id.tvLatDest);
+        long_textDest = (TextView) findViewById(R.id.tvLongitudeDest);
+        lat_textCurr = (TextView) findViewById(R.id.tvLatCurr);
+        long_textCurr = (TextView) findViewById(R.id.tvLongitudeCurr);
 
         btnContact.setOnClickListener(clicker);
         btnLocation.setOnClickListener(clicker);
         btnSend.setOnClickListener(clicker);
 
+        createNotificationChannel();
         //Get name of owner of phone owner for message later
-        
-            GetNameDialog();
+        GetNameDialog();
+        getLocation();
 
     }
     private View.OnClickListener clicker = new View.OnClickListener() {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.btnLocation:
-                    location = "Test Location";
-                    Intent mapsfeature = new Intent(getApplicationContext(), MapsFeature.class);
-                    startActivity(mapsfeature);
+                    //////testomg
+                    LongDest = 100.0;
+                    LatDest = 100.0;
+                    lat_textDest.setText(Double.toString(LatDest));
+                    long_textDest.setText(Double.toString(LongDest));
+                    sendNotification();
+                    //////End Testing
+                    //Intent mapsfeature = new Intent(getApplicationContext(), MapsFeature.class);
+                    //startActivity(mapsfeature);
                     break;
                 case R.id.btnContact:
                     Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
@@ -87,12 +119,28 @@ public class MainActivity extends AppCompatActivity {
                     startActivityForResult(pickContact, CONTACT_ACTIVITY_REQUEST_CODE);
                     break;
                 case R.id.btnSend:
-                    //We can remove this eventually this button was just for debugging the sms
-                    if(number != null) {
-                    String message = name + " has reached the destination of " + location + "!";
-                    sendSMS(number, message);
-                    break;
-                }
+
+                    if((number != null) && (LongDest != null) && (LatDest != null)) {
+                        location_text.setText("Trip Started");
+                        boolean location_reached = false;
+
+                        while(location_reached == false) {
+
+                            int testCount = Count;
+                            Double test = check_distance();
+                            if (test < LOCATION_DISTANCE_CHECK)
+                                location_reached = true;
+                        }
+                        location_text.setText("Destination Reached");
+                        sendNotification();
+                        String message = name + " has reached their destination!";
+                        sendSMS(number, message);
+
+                        break;
+                    }
+                    else{
+                        location_text.setText("NO location set");
+                    }
                 default:
                     break;
 
@@ -115,7 +163,12 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         if (requestCode == MAP_REQUEST_CODE && resultCode == RESULT_OK) {
-
+            //TJ, all you should need to change in here is to set LatDest/LongDest to the values from the map activity
+            location_text.setText("Location Set");
+            LatDest = 10.0; //change this to something
+            LongDest = 10.0; //change this to something
+            lat_textDest.setText(Double.toString(LatDest));
+            long_textDest.setText(Double.toString(LongDest));
         }
 
     }
@@ -145,5 +198,92 @@ public class MainActivity extends AppCompatActivity {
     builder.show();
     }
 
+    public Double check_distance(){
+        if (LatCurr != null) {
+            // The math module contains a function
+            // named toRadians which converts from
+            // degrees to radians.
+            Double lon1 = Math.toRadians(LongCurr);
+            Double lon2 = Math.toRadians(LongDest);
+            Double lat1 = Math.toRadians(LatCurr);
+            Double lat2 = Math.toRadians(LatDest);
+
+            // Haversine formula
+            double dlon = lon2 - lon1;
+            double dlat = lat2 - lat1;
+            double a = Math.pow(Math.sin(dlat / 2), 2)
+                    + Math.cos(lat1) * Math.cos(lat2)
+                    * Math.pow(Math.sin(dlon / 2), 2);
+
+            double c = 2 * Math.asin(Math.sqrt(a));
+
+            // Radius of earth in kilometers. Use 3956
+            // for miles
+            double r = 6371;
+
+            // calculate the result
+            return (c * r);
+        }
+        else{
+            return 10000.0;
+        }
+    }
+
+    public void sendNotification(){
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "Channel")
+                .setSmallIcon(R.drawable.car)
+                .setContentTitle("Destination Text Sent")
+                .setContentText("Your arrival at your Destination has been sent to " + number)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText("Your arrival at your Destination has been sent to " + number))
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+// notificationId is a unique int for each notification that you must define
+        notificationManager.notify(6, builder.build());
+    }
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Default Channel";
+            String description = "Default Channel";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("Channel", name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+
+    void getLocation() {
+        locationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(5 * 1000)
+                .setFastestInterval(5 * 1000);
+
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                LatCurr = locationResult.getLastLocation().getLatitude();
+                LongCurr = locationResult.getLastLocation().getLongitude();
+                lat_textCurr.setText(Double.toString(LatCurr));
+                long_textCurr.setText(Double.toString(LongCurr));
+                Count = Count + 1;
+            }
+        };
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+    }
 }
 

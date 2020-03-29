@@ -66,7 +66,7 @@ public class MapsFeature extends FragmentActivity implements OnMapReadyCallback 
 
         mSearchText = (EditText) findViewById(R.id.input_search);
 
-        Places.initialize(this, "AIzaSyAjG0QMrUxnZF0w0SaVgNcClvtUwH-KLkU");
+        Places.initialize(this, "AIzaSyD9TrP_T1dCmtDC5FtOxpI_r_WedFpa4LY");
 
         placesClient = Places.createClient(this);
 
