@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
                     if((number != null) && (LongDest != null) && (LatDest != null)) {
                         //LocationRunnable locThread = new LocationRunnable();
                         //locThread.run();
-                        new Thread(new LocationRunnable()).start();
+                       // new Thread(new LocationRunnable()).start();
                         //DistanceRunnable distRun = new DistanceRunnable();
 
 
@@ -132,8 +132,20 @@ public class MainActivity extends AppCompatActivity {
                         while(location_reached == false) {
                             //distRun.run();
                             distance = check_distance();
-                            lat_textCurr.setText(Double.toString(LatCurr));
-                            long_textCurr.setText(Double.toString(LongCurr));
+                            fusedLocationClient.getLastLocation().addOnSuccessListener(MainActivity.this, new OnSuccessListener<Location>() {
+                                        @Override
+                                        public void onSuccess(Location locationResult) {
+                                            // Got last known location. In some rare situations this can be null.
+                                            if (location != null) {
+                                                LatCurr = locationResult.getLatitude();
+                                                LongCurr = locationResult.getLongitude();
+                                                lat_textCurr.setText(Double.toString(LatCurr));
+                                                long_textCurr.setText(Double.toString(LongCurr));
+                                            }
+                                        }
+                            });
+
+
                             if (distance < LOCATION_DISTANCE_CHECK)
                                 location_reached = true;
                         }
@@ -306,20 +318,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public class DistanceRunnable implements Runnable {
-
-        @Override
-        public void run() {
-            // Moves the current Thread into the background
-            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
 
-                int testCount = Count;
-                distance = check_distance();
-
-
-        }
-
-    }
 }
 
