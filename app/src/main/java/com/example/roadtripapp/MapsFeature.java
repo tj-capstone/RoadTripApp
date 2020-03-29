@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -11,9 +12,11 @@ import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,13 +50,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class MapsFeature extends FragmentActivity implements OnMapReadyCallback {
-    private Boolean mLocationPermissionsGranted = false;
+public class MapsFeature extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private static final float DEFAULT_ZOOM = 15f;
     private EditText mSearchText;
-    PlacesClient placesClient;
+    private Button pickLocation;
+    double finalLongitude;
+    double finalLatitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,38 +67,20 @@ public class MapsFeature extends FragmentActivity implements OnMapReadyCallback 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
         mSearchText = (EditText) findViewById(R.id.input_search);
 
-        Places.initialize(this, "AIzaSyD9TrP_T1dCmtDC5FtOxpI_r_WedFpa4LY");
-
-        placesClient = Places.createClient(this);
-
-        final AutocompleteSupportFragment autocompleteSupportFragment =
-                (AutocompleteSupportFragment)
-                        getSupportFragmentManager().findFragmentById(R.id.place_autocomplete_powered_by_google);
-
-        autocompleteSupportFragment.setPlaceFields(Arrays.asList(com.google.android.libraries.places.api.model.Place.Field.ID,
-                                                                    com.google.android.libraries.places.api.model.Place.Field.NAME,
-                                                                        com.google.android.libraries.places.api.model.Place.Field.LAT_LNG,
-                                                                            com.google.android.libraries.places.api.model.Place.Field.ADDRESS));
-        autocompleteSupportFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+        pickLocation = (Button) findViewById(R.id.pickLocation);
+        pickLocation.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onPlaceSelected(@NonNull Place place) {
-                final LatLng latLng = place.getLatLng();
-
-                Toast.makeText(MapsFeature.this, ""+latLng.latitude, Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onError(@NonNull Status status) {
-                Toast.makeText(MapsFeature.this, ""+status.getStatusMessage(), Toast.LENGTH_SHORT).show();
+            public void onClick(View v) {
+                Intent intent = new Intent(MapsFeature.this, MainActivity.class);
+                intent.putExtra("latitude", finalLatitude);
+                intent.putExtra("longitude", finalLongitude);
+                startActivity(intent);
             }
         });
 
-
     }
-
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -107,11 +93,11 @@ public class MapsFeature extends FragmentActivity implements OnMapReadyCallback 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setOnMapLongClickListener(this);
         getDeviceLocation();
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
         intSearch();
-
         // Add a marker in Sydney and move the camera
        // LatLng sydney = new LatLng(-34, 151);
         //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
@@ -119,7 +105,6 @@ public class MapsFeature extends FragmentActivity implements OnMapReadyCallback 
     }
 
     private void intSearch() {
-
         mSearchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
@@ -131,7 +116,6 @@ public class MapsFeature extends FragmentActivity implements OnMapReadyCallback 
                     //execute our method for searching
                     geoLocate();
                 }
-
                 return false;
             }
         });
@@ -155,11 +139,8 @@ public class MapsFeature extends FragmentActivity implements OnMapReadyCallback 
             //Toast.makeText(this, address.toString(), Toast.LENGTH_SHORT).show();
 
             moveCamera(new LatLng(address.getLatitude(),address.getLongitude()), DEFAULT_ZOOM, address.getAddressLine(0));
-
-
         }
     }
-
 
     private void getDeviceLocation() {
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
@@ -172,6 +153,8 @@ public class MapsFeature extends FragmentActivity implements OnMapReadyCallback 
                     public void onComplete(@NonNull Task task) {
                         if(task.isSuccessful()){
                             Location currentLocation = (Location) task.getResult();
+
+                           // mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation.getLatitude(), currentLocation.getLongitude()));
 
                             moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),
                                     DEFAULT_ZOOM, "My Location");
@@ -187,13 +170,17 @@ public class MapsFeature extends FragmentActivity implements OnMapReadyCallback 
     }
     private void moveCamera(LatLng latLng, float defaultZoom, String title) {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, defaultZoom));
-        MarkerOptions options = new MarkerOptions().position(latLng).title(title);
-        mMap.addMarker(options);
         hideSoftKeyboard();
-
     }
     private void hideSoftKeyboard() {
        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
 
+    @Override
+    public void onMapLongClick(LatLng latLng) {
+        MarkerOptions options = new MarkerOptions().position(latLng).draggable(true);
+        mMap.addMarker(options);
+        finalLatitude = options.getPosition().latitude;
+        finalLongitude = options.getPosition().longitude;
+    }
 }

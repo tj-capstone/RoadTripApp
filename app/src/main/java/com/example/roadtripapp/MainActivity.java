@@ -98,13 +98,12 @@ public class MainActivity extends AppCompatActivity {
         GetNameDialog();
         getLocation();
 
+
     }
     private View.OnClickListener clicker = new View.OnClickListener() {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.btnLocation:
-
-
                     Intent mapsfeature = new Intent(getApplicationContext(), MapsFeature.class);
                     startActivity(mapsfeature);
                     break;
@@ -159,9 +158,16 @@ public class MainActivity extends AppCompatActivity {
         }
         if (requestCode == MAP_REQUEST_CODE && resultCode == RESULT_OK) {
             //TJ, all you should need to change in here is to set LatDest/LongDest to the values from the map activity
+
+            // CODE NEVER GETS INTO THIS IF STATEMENT, HOW CAN I GET THE MAPREQUEST CODE TO "GO" WHEN I PRESS THE PICK LOCATION
+            // BUTTON IN THE MAP ACTIVITY ??????
+
+            Intent incomingIntent = getIntent();
+            String incominglat = incomingIntent.getStringExtra("latitude");
+            String incominglong = incomingIntent.getStringExtra("longitude");
+            LatDest = Double.valueOf(incominglat);
+            LongDest = Double.valueOf(incominglong);
             location_text.setText("Location Set");
-            LatDest = 10.0; //change this to something
-            LongDest = 10.0; //change this to something
             lat_textDest.setText(Double.toString(LatDest));
             long_textDest.setText(Double.toString(LongDest));
         }

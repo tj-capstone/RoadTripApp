@@ -21,20 +21,35 @@
         android:background="#fff"
         android:id="@+id/relLayout1">
 
+        <ImageView
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:id="@+id/ic_magnify"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/ic_search"/>
+
         <EditText
             android:singleLine="true"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/ic_magnify"
             android:textSize="15sp"
             android:textColor="#000"
             android:id="@+id/input_search"
             android:background="@null"
-            android:imeOptions="actionSearch"/>
-            <fragment
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
-                android:id="@+id/place_autocomplete_powered_by_google"/>
+            android:imeOptions="actionSearch"
+            android:hint="Enter a Location Name"/>
+
+        <Button
+            android:id="@+id/pickLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="-1dp"
+            android:layout_marginBottom="671dp"
+            android:text="Pick Location " />
     </RelativeLayout>
+
 </RelativeLayout>
