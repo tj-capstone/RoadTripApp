@@ -1,5 +1,6 @@
 package com.example.roadtripapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
@@ -42,7 +43,11 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceReport;
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
 import java.util.concurrent.Executor;
 
@@ -68,10 +73,8 @@ public class MainActivity extends AppCompatActivity {
     public int Count = 0;
     public Double distance;
     public static final Double LOCATION_DISTANCE_CHECK = 0.1; //needs to be in kilometers - eg this is 100 m
-    LocationCallback locationCallback;
-    LocationRequest locationRequest;
-    FusedLocationProviderClient fusedLocationClient;
-
+    private FusedLocationProviderClient mFusedLocationProviderClient;
+    public GoogleMap mMap;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -313,19 +316,27 @@ public class MainActivity extends AppCompatActivity {
 
     public void getLocation() {
         // Get the location manager
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        Criteria criteria = new Criteria();
-        String bestProvider = locationManager.getBestProvider(criteria, false);
-        Location location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-        if (location != null) {
-            try {
-                LatCurr = location.getLatitude();
-                LongCurr = location.getLongitude();
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
-            } catch (NullPointerException e) {
-                e.printStackTrace();
+        try{
 
-            }
+            final Task location = mFusedLocationProviderClient.getLastLocation();
+            location.addOnCompleteListener(new OnCompleteListener() {
+                @Override
+                public void onComplete(@NonNull Task task) {
+                    if(task.isSuccessful()){
+                        Location currentLocation = (Location) task.getResult();
+                        LatCurr = currentLocation.getLatitude();
+                        LongCurr = currentLocation.getLongitude();
+
+
+                    }else{
+                        LatCurr = null;c
+                    }
+                }
+            });
+
+        }catch (SecurityException e){
         }
     }
 
