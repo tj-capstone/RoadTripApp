@@ -15,7 +15,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -132,20 +134,9 @@ public class MainActivity extends AppCompatActivity {
                         while(location_reached == false) {
                             //distRun.run();
                             distance = check_distance();
-                            fusedLocationClient.getLastLocation().addOnSuccessListener(MainActivity.this, new OnSuccessListener<Location>() {
-                                        @Override
-                                        public void onSuccess(Location locationResult) {
-                                            // Got last known location. In some rare situations this can be null.
-                                            if (location != null) {
-                                                LatCurr = locationResult.getLatitude();
-                                                LongCurr = locationResult.getLongitude();
-                                                lat_textCurr.setText(Double.toString(LatCurr));
-                                                long_textCurr.setText(Double.toString(LongCurr));
-                                            }
-                                        }
-                            });
-
-
+                            getLocation();
+                            lat_textCurr.setText(Double.toString(LatCurr));
+                            long_textCurr.setText(Double.toString(LongCurr));
                             if (distance < LOCATION_DISTANCE_CHECK)
                                 location_reached = true;
                         }
@@ -284,9 +275,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    void getLocation() {
-
-    }
 
     public class LocationRunnable implements Runnable {
 
@@ -318,6 +306,24 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void getLocation()
+    {
+        // Get the location manager
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        Criteria criteria = new Criteria();
+        String bestProvider = locationManager.getBestProvider(criteria, false);
+        Location location = locationManager.getLastKnownLocation(bestProvider);
+
+        try {
+            LatCurr = location.getLatitude ();
+            LongCurr = location.getLongitude ();
+
+        }
+        catch (NullPointerException e){
+            e.printStackTrace();
+
+        }
+    }
 
 
 }
