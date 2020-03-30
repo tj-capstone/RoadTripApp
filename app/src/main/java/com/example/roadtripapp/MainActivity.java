@@ -135,8 +135,10 @@ public class MainActivity extends AppCompatActivity {
                             //distRun.run();
                             distance = check_distance();
                             getLocation();
-                            lat_textCurr.setText(Double.toString(LatCurr));
-                            long_textCurr.setText(Double.toString(LongCurr));
+                            if(LatCurr != null) {
+                                lat_textCurr.setText(Double.toString(LatCurr));
+                                long_textCurr.setText(Double.toString(LongCurr));
+                            }
                             if (distance < LOCATION_DISTANCE_CHECK)
                                 location_reached = true;
                         }
@@ -306,22 +308,21 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void getLocation()
-    {
+    public void getLocation() {
         // Get the location manager
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         Criteria criteria = new Criteria();
         String bestProvider = locationManager.getBestProvider(criteria, false);
         Location location = locationManager.getLastKnownLocation(bestProvider);
+        if (location != null) {
+            try {
+                LatCurr = location.getLatitude();
+                LongCurr = location.getLongitude();
 
-        try {
-            LatCurr = location.getLatitude ();
-            LongCurr = location.getLongitude ();
+            } catch (NullPointerException e) {
+                e.printStackTrace();
 
-        }
-        catch (NullPointerException e){
-            e.printStackTrace();
-
+            }
         }
     }
 
