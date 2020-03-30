@@ -120,7 +120,10 @@ public class MainActivity extends AppCompatActivity {
                     startActivityForResult(pickContact, CONTACT_ACTIVITY_REQUEST_CODE);
                     break;
                 case R.id.btnSend:
-
+                    if (checkSelfPermission(Manifest.permission.SEND_SMS)
+                            == PackageManager.PERMISSION_DENIED) {
+                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.SEND_SMS}, 0);
+                    }
                     if((number != null) && (LongDest != null) && (LatDest != null)) {
                         //LocationRunnable locThread = new LocationRunnable();
                         //locThread.run();
