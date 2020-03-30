@@ -11,20 +11,24 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.Process;
 import android.provider.ContactsContract;
 import android.telephony.SmsManager;
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -72,10 +76,56 @@ public class MainActivity extends AppCompatActivity {
     LocationRequest locationRequest;
     FusedLocationProviderClient fusedLocationClient;
 
+    final LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            //mlocation = location;
+            LatCurr = location.getLatitude();
+            LongCurr = location.getLongitude();
+            lat_textCurr.setText(Double.toString(LatCurr));
+            long_textCurr.setText(Double.toString(LongCurr));
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            Log.d("Status Changed", String.valueOf(status));
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            Log.d("Provider Enabled", provider);
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            Log.d("Provider Disabled", provider);
+        }
+    };
+
+    // Now first make a criteria with your requirements
+    // this is done to save the battery life of the device
+    // there are various other other criteria you can search for..
+    public Criteria criteria = new Criteria();
+
+
+    // Now create a location manager
+    public final LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+
+    // This is the Best And IMPORTANT part
+    public final Looper looper = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        criteria.setAccuracy(Criteria.ACCURACY_COARSE);
+        criteria.setPowerRequirement(Criteria.POWER_LOW);
+        criteria.setAltitudeRequired(false);
+        criteria.setBearingRequired(false);
+        criteria.setSpeedRequired(false);
+        criteria.setCostAllowed(true);
+        criteria.setHorizontalAccuracy(Criteria.ACCURACY_HIGH);
+        criteria.setVerticalAccuracy(Criteria.ACCURACY_HIGH);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PackageManager.PERMISSION_GRANTED);
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PackageManager.PERMISSION_GRANTED);
@@ -313,20 +363,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void getLocation() {
         // Get the location manager
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        Criteria criteria = new Criteria();
-        String bestProvider = locationManager.getBestProvider(criteria, false);
-        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        if (location != null) {
-            try {
-                LatCurr = location.getLatitude();
-                LongCurr = location.getLongitude();
-
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-
-            }
-        }
+        locationManager.requestSingleUpdate(criteria, locationListener, looper);
     }
 
 
