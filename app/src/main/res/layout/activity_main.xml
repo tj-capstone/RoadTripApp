@@ -69,8 +69,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginEnd="83dp"
-        android:layout_marginBottom="503dp"
+        android:layout_marginEnd="47dp"
+        android:layout_marginBottom="502dp"
         android:text="Latitude " />
 
     <TextView
@@ -79,8 +79,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginEnd="76dp"
-        android:layout_marginBottom="438dp"
+        android:layout_marginEnd="44dp"
+        android:layout_marginBottom="441dp"
         android:text="Longitude" />
 
     <TextView
@@ -89,8 +89,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginEnd="274dp"
-        android:layout_marginBottom="498dp"
+        android:layout_marginEnd="205dp"
+        android:layout_marginBottom="504dp"
         android:text="Latitude " />
 
     <TextView
@@ -99,8 +99,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginEnd="269dp"
-        android:layout_marginBottom="438dp"
+        android:layout_marginEnd="203dp"
+        android:layout_marginBottom="439dp"
         android:text="Longitude" />
 
     <TextView

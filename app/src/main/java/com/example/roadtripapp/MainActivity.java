@@ -104,14 +104,18 @@ public class MainActivity extends AppCompatActivity {
 
 
         // construct a new instance of SimpleLocation
-        mlocation = new SimpleLocation(this);
+        boolean requireFineGranularity = true;
+        boolean passiveMode = false;
+        long updateIntervalInMilliseconds = 3*1000;
+        
+        mlocation = new SimpleLocation(this, requireFineGranularity, passiveMode, updateIntervalInMilliseconds);
 
         // if we can't access the location yet
         if (!mlocation.hasLocationEnabled()) {
             // ask the user to enable location access
             SimpleLocation.openSettings(this);
         }
-
+        mlocation.beginUpdates();
         createNotificationChannel();
         //Get name of owner of phone owner for message later
         GetNameDialog();
@@ -138,33 +142,8 @@ public class MainActivity extends AppCompatActivity {
                         ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.SEND_SMS}, 0);
                     }
                     if((number != null) && (LongDest != null) && (LatDest != null)) {
-                        //LocationRunnable locThread = new LocationRunnable();
-                        //locThread.run();
-                       // new Thread(new LocationRunnable()).start();
-                        //DistanceRunnable distRun = new DistanceRunnable();
-
-
                         location_text.setText("Trip Started");
-                        boolean location_reached = false;
-
-                        while(location_reached == false) {
-                            //distRun.run();
-                            distance = check_distance();
-                            //LatCurr = mlocation.getLatitude();
-                            //LongCurr = mlocation.getLongitude();
-                            //getLocation();
-                            new getLocation().execute();
-                            //if(LatCurr != null) {
-                            //lat_textCurr.setText(Double.toString(LatCurr));
-                            //long_textCurr.setText(Double.toString(LongCurr));
-                            //}
-                            if (distance < LOCATION_DISTANCE_CHECK)
-                                location_reached = true;
-                        }
-                        location_text.setText("Destination Reached");
-                        sendNotification();
-                        String message = name + " has reached their destination!";
-                        sendSMS(number, message);
+                        new checkdist().execute();
                     }
                     else{
                         location_text.setText("NO location set");
@@ -234,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public Double check_distance(){
-        if (LatCurr != null) {
+        if ((LatCurr != null) && (LongCurr != null)) {
             // The math module contains a function
             // named toRadians which converts from
             // degrees to radians.
@@ -298,22 +277,46 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    private class getLocation extends AsyncTask<String, Integer, String> {
-        protected String doInBackground(String... args) {
-            LatCurr = mlocation.getLatitude();
-            LongCurr = mlocation.getLongitude();
-            //getLocation();
-            //if(LatCurr != null) {
 
+
+    private class checkdist extends AsyncTask<String, String, String> {
+        protected String doInBackground(String... args) {
+            int num = 0;
+
+            boolean location_reached = false;
+
+            while(location_reached == false) {
+                //distRun.run();
+                distance = check_distance();
+                LatCurr = mlocation.getLatitude();
+                LongCurr = mlocation.getLongitude();
+                //LatCurr = mlocation.getLatitude();
+                //LongCurr = mlocation.getLongitude();
+                //getLocation();
+                if( num %50 == 0)
+                    publishProgress("hi");
+                num = num+1;
+                //if(LatCurr != null) {
+                //lat_textCurr.setText(Double.toString(LatCurr));
+                //long_textCurr.setText(Double.toString(LongCurr));
+                //}
+                if (distance < LOCATION_DISTANCE_CHECK)
+                    location_reached = true;
+            }
             return "Hi";
         }
-        protected void onPostExecute(Long result) {
+        protected void onProgressUpdate(String... progress) {
             lat_textCurr.setText(Double.toString(LatCurr));
             long_textCurr.setText(Double.toString(LongCurr));
         }
+        protected void onPostExecute(String result) {
+            location_text.setText("Destination Reached");
+            sendNotification();
+            String message = name + " has reached their destination!";
+            sendSMS(number, message);
+        }
 
     }
-
 
 }
 
