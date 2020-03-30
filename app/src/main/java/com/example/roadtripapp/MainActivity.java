@@ -316,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         Criteria criteria = new Criteria();
         String bestProvider = locationManager.getBestProvider(criteria, false);
-        Location location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         if (location != null) {
             try {
                 LatCurr = location.getLatitude();
