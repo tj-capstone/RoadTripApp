@@ -46,6 +46,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.concurrent.Executor;
 
+import im.delight.android.location.SimpleLocation;
+
 public class MainActivity extends AppCompatActivity {
     public static final int CONTACT_ACTIVITY_REQUEST_CODE = 0;
     static final int MAP_REQUEST_CODE = 1;
@@ -68,15 +70,15 @@ public class MainActivity extends AppCompatActivity {
     public int Count = 0;
     public Double distance;
     public static final Double LOCATION_DISTANCE_CHECK = 0.1; //needs to be in kilometers - eg this is 100 m
-    LocationCallback locationCallback;
-    LocationRequest locationRequest;
-    FusedLocationProviderClient fusedLocationClient;
+
+    private SimpleLocation mlocation;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PackageManager.PERMISSION_GRANTED);
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PackageManager.PERMISSION_GRANTED);
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, 0);
@@ -98,6 +100,16 @@ public class MainActivity extends AppCompatActivity {
         btnContact.setOnClickListener(clicker);
         btnLocation.setOnClickListener(clicker);
         btnSend.setOnClickListener(clicker);
+
+
+        // construct a new instance of SimpleLocation
+        mlocation = new SimpleLocation(this);
+
+        // if we can't access the location yet
+        if (!mlocation.hasLocationEnabled()) {
+            // ask the user to enable location access
+            SimpleLocation.openSettings(this);
+        }
 
         createNotificationChannel();
         //Get name of owner of phone owner for message later
@@ -137,11 +149,13 @@ public class MainActivity extends AppCompatActivity {
                         while(location_reached == false) {
                             //distRun.run();
                             distance = check_distance();
-                            getLocation();
-                            if(LatCurr != null) {
-                                lat_textCurr.setText(Double.toString(LatCurr));
-                                long_textCurr.setText(Double.toString(LongCurr));
-                            }
+                            LatCurr = mlocation.getLatitude();
+                            LongCurr = mlocation.getLongitude();
+                            //getLocation();
+                            //if(LatCurr != null) {
+                            lat_textCurr.setText(Double.toString(LatCurr));
+                            long_textCurr.setText(Double.toString(LongCurr));
+                            //}
                             if (distance < LOCATION_DISTANCE_CHECK)
                                 location_reached = true;
                         }
@@ -281,35 +295,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    public class LocationRunnable implements Runnable {
 
-        @Override
-        public void run() {
-            // Moves the current Thread into the background
-            android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
-
-            locationRequest = LocationRequest.create()
-                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                    .setInterval(5 * 1000)
-                    .setFastestInterval(5 * 1000);
-
-            locationCallback = new LocationCallback() {
-                @Override
-                public void onLocationResult(LocationResult locationResult) {
-                    super.onLocationResult(locationResult);
-                    LatCurr = locationResult.getLastLocation().getLatitude();
-                    LongCurr = locationResult.getLastLocation().getLongitude();
-
-                    Count = Count + 1;
-                }
-            };
-
-            fusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
-
-            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
-        }
-
-    }
 
     public void getLocation() {
         // Get the location manager
@@ -331,4 +317,6 @@ public class MainActivity extends AppCompatActivity {
 
 
 }
+
+
 
