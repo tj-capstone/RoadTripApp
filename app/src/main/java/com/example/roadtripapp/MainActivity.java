@@ -19,6 +19,7 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
@@ -149,12 +150,13 @@ public class MainActivity extends AppCompatActivity {
                         while(location_reached == false) {
                             //distRun.run();
                             distance = check_distance();
-                            LatCurr = mlocation.getLatitude();
-                            LongCurr = mlocation.getLongitude();
+                            //LatCurr = mlocation.getLatitude();
+                            //LongCurr = mlocation.getLongitude();
                             //getLocation();
+                            new getLocation().execute();
                             //if(LatCurr != null) {
-                            lat_textCurr.setText(Double.toString(LatCurr));
-                            long_textCurr.setText(Double.toString(LongCurr));
+                            //lat_textCurr.setText(Double.toString(LatCurr));
+                            //long_textCurr.setText(Double.toString(LongCurr));
                             //}
                             if (distance < LOCATION_DISTANCE_CHECK)
                                 location_reached = true;
@@ -296,23 +298,20 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    private class getLocation extends AsyncTask<String, Integer, String> {
+        protected String doInBackground(String... args) {
+            LatCurr = mlocation.getLatitude();
+            LongCurr = mlocation.getLongitude();
+            //getLocation();
+            //if(LatCurr != null) {
 
-    public void getLocation() {
-        // Get the location manager
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        Criteria criteria = new Criteria();
-        String bestProvider = locationManager.getBestProvider(criteria, false);
-        Location location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-        if (location != null) {
-            try {
-                LatCurr = location.getLatitude();
-                LongCurr = location.getLongitude();
-
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-
-            }
+            return "Hi";
         }
+        protected void onPostExecute(Long result) {
+            lat_textCurr.setText(Double.toString(LatCurr));
+            long_textCurr.setText(Double.toString(LongCurr));
+        }
+
     }
 
 
