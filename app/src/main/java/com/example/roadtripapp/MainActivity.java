@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
         boolean requireFineGranularity = true;
         boolean passiveMode = false;
         long updateIntervalInMilliseconds = 3*1000;
-        
+
         mlocation = new SimpleLocation(this, requireFineGranularity, passiveMode, updateIntervalInMilliseconds);
 
         // if we can't access the location yet

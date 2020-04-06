@@ -56,8 +56,8 @@ public class MapsFeature extends FragmentActivity implements OnMapReadyCallback,
     private static final float DEFAULT_ZOOM = 15f;
     private EditText mSearchText;
     private Button pickLocation;
-    double finalLongitude;
-    double finalLatitude;
+    double finalLongitude = -122.8256;
+    double finalLatitude = 49.2781;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
